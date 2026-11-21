@@ -1,3 +1,4 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -7,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 
 from foundrysdk.ui.json.blocks import (
+    Block,
     KeyBlock,
     ValueBlock
 )
@@ -22,8 +24,10 @@ from foundrysdk.ui.json.blocks.block_styles import (
 )
 
 
-class ContainerBlock(QFrame):
-    def __init__(self, key, data, on_change, depth=0):
+class ContainerBlock(Block):
+    selectionChanged = Signal(bool)
+
+    def __init__(self, key, data, on_change, depth=0, selectable=True):
         super().__init__()
 
         self.key = key
@@ -31,8 +35,11 @@ class ContainerBlock(QFrame):
         self.on_change = on_change
         self.depth = depth
         self.collapsed = False
+        self.selected = False
+        self.selectable = selectable
 
         kind = "object" if isinstance(data, dict) else "array"
+        self.kind = kind
 
         self.setStyleSheet(container_style(kind))
 
@@ -76,10 +83,40 @@ class ContainerBlock(QFrame):
 
         self.render_children()
 
+    # Selection behavior
+
+    def mousePressEvent(self, event):
+        if self.selectable:
+            self.set_selected(True)
+
+        super().mousePressEvent(event)
+
+
+    def set_selected(self, selected: bool):
+        """Select or deselect this ContainerBlock."""
+        if not self.selectable:
+            return
+
+        if self.selected == selected:
+            return
+
+        self.selected = selected
+
+        self.setStyleSheet(
+            container_style(self.kind, selected)
+        )
+
+        self.selectionChanged.emit(selected)
+
+    # Key handling
+
     def update_key(self, new_key):
         self.key = new_key
 
-        self.on_change(self.data)
+        if self.on_change:
+            self.on_change(self.data)
+
+    # Children
 
     def render_children(self):
         while self.children_layout.count():
@@ -103,7 +140,8 @@ class ContainerBlock(QFrame):
                 else:
                     self.data[k] = new_value
 
-                self.on_change(self.data)
+                if self.on_change:
+                    self.on_change(self.data)
 
             if isinstance(value, (dict, list)):
                 child = ContainerBlock(
@@ -116,6 +154,8 @@ class ContainerBlock(QFrame):
                 child = ValueBlock(key, value, update)
 
             self.children_layout.addWidget(child)
+
+    # Collapse / expand
 
     def toggle_children(self):
         self.collapsed = not self.collapsed

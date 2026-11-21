@@ -139,13 +139,15 @@ def value_style(kind, selected=False):
     """
 
 
-def container_style(kind):
+def container_style(kind, selected=False):
     hover_background = BUTTON_HOVER_BACKGROUND or OUTLINES[kind]
+
+    outline = SELECTED_OUTLINE if selected else OUTLINES[kind]
 
     return f"""
         QFrame {{
             background: {TRANSPARENT};
-            border: {BORDER_WIDTH}px solid {OUTLINES[kind]};
+            border: {BORDER_WIDTH}px solid {outline};
             border-radius: {CONTAINER_BORDER_RADIUS}px;
         }}
 

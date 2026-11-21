@@ -1,10 +1,11 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
 )
+
+from foundrysdk.ui.json.blocks.block import Block
 
 from foundrysdk.ui.json.blocks.block_styles import (
     variable_style,
@@ -12,10 +13,9 @@ from foundrysdk.ui.json.blocks.block_styles import (
 )
 
 
-class VariableBlock(QFrame):
+class VariableBlock(Block):
     """A block storing a variable, parented by a ValueBlock or Array ContainerBlock."""
 
-    selectionChanged = Signal(bool)
     valueChanged = Signal(str)
 
     def __init__(
@@ -28,7 +28,6 @@ class VariableBlock(QFrame):
         super().__init__()
 
         self.kind = kind
-        self.selected = False
         self._value = str(value)
         self._alignment = alignment
 
@@ -54,20 +53,7 @@ class VariableBlock(QFrame):
 
         self._update_style()
 
-    # Public interface
-
-    def set_selected(self, selected: bool):
-        """Select or deselect the variable."""
-        if self.selected == selected:
-            return
-
-        self.selected = selected
-        self._update_style()
-
-        self.selectionChanged.emit(selected)
-
     def set_value(self, value):
-        """Update the variable's displayed value."""
         self._value = str(value)
         self.value_label.setText(self._value)
 
@@ -82,11 +68,11 @@ class VariableBlock(QFrame):
     # Internal implementation
 
     def _select_variable(self, event):
-        self.set_selected(True)
+        self.select()
         event.accept()
 
     def _edit_value(self, event):
-        self.set_selected(True)
+        self.select()
 
         self.value_edit = QLineEdit(self._value)
         self.value_edit.setAlignment(self._alignment)

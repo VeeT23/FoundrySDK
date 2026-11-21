@@ -9,7 +9,14 @@ class RootBlock(ContainerBlock):
     """Invisible root container that renders its children directly."""
 
     def __init__(self, data, on_change):
-        super().__init__("ROOT", data, on_change)
+        super().__init__(
+            "ROOT",
+            data,
+            on_change,
+            selectable=False
+        )
+
+        # Rest of your existing initialization...
 
         # Remove the root header.
         header = self.layout.takeAt(0)

@@ -1,3 +1,4 @@
+from .block import Block
 from .variable import VariableBlock
 from .key import KeyBlock
 from .value import ValueBlock
