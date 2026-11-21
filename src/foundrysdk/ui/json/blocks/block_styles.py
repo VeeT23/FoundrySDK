@@ -4,6 +4,8 @@
 # ============================================================
 
 # Colors
+SELECTED_OUTLINE = "#FFFFFF"
+
 OUTLINES = {
     "object":  "#367FC2",
     "array":   "#9862D4",
@@ -11,6 +13,15 @@ OUTLINES = {
     "number":  "#D99138",
     "boolean": "#D45B7B",
     "null":    "#858C9C",
+}
+
+SELECTED_COLORS = {
+    "object":  "#294B6B",
+    "array":   "#594078",
+    "string":  "#285A43",
+    "number":  "#805027",
+    "boolean": "#78374F",
+    "null":    "#4B505C",
 }
 
 COLORS = {
@@ -44,9 +55,9 @@ BUTTON_PADDING = "4px 9px"
 KEY_PADDING = "2px 2px"
 
 # Layout margins
-VARIABLE_MARGINS = (2, 0, 2, 0)
-KEY_MARGINS = (2, 0, 2, 0)
-VALUE_MARGINS = (12, 4, 4, 4)
+VARIABLE_MARGINS = (6, 3, 6, 3)
+KEY_MARGINS = (6, 3, 6, 3)
+VALUE_MARGINS = (4, 4, 4, 4)
 CONTAINER_MARGINS = (10, 8, 10, 10)
 CHILDREN_MARGINS = (12, 8, 12, 8)
 ROOT_MARGINS = (0, 0, 0, 0)
@@ -67,11 +78,14 @@ BUTTON_HOVER_BACKGROUND = None
 # STYLESHEET HELPERS
 # ============================================================
 
-def key_style():
+def key_style(selected=False):
+    outline = SELECTED_OUTLINE if selected else TRANSPARENT
+
     return f"""
         QFrame {{
             background: {TRANSPARENT};
-            border: none;
+            border: {BORDER_WIDTH}px solid {outline};
+            border-radius: {VARIABLE_BORDER_RADIUS}px;
         }}
 
         QLineEdit {{
@@ -85,11 +99,14 @@ def key_style():
         }}
     """
 
-def variable_style(kind):
+def variable_style(kind, selected=False):
+
+    outline = SELECTED_OUTLINE if selected else OUTLINES[kind]
+    background = SELECTED_COLORS[kind] if selected else COLORS[kind]
     return f"""
         QFrame {{
-            background: {COLORS[kind]};
-            border: {BORDER_WIDTH}px solid {OUTLINES[kind]};
+            background: {background};
+            border: {BORDER_WIDTH}px solid {outline};
             border-radius: {VARIABLE_BORDER_RADIUS}px;
         }}
 
@@ -101,11 +118,14 @@ def variable_style(kind):
         }}
     """
 
-def value_style(kind):
+def value_style(kind, selected=False):
+
+    outline = SELECTED_OUTLINE if selected else OUTLINES[kind]
+
     return f"""
         QFrame {{
             background: {TRANSPARENT};
-            border: {BORDER_WIDTH}px solid {OUTLINES[kind]};
+            border: {BORDER_WIDTH}px solid {outline};
             border-radius: {VALUE_BORDER_RADIUS}px;
         }}
 

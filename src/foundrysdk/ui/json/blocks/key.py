@@ -1,46 +1,46 @@
-from PySide6.QtWidgets import (
-    QFrame,
-    QHBoxLayout,
-    QLineEdit,
-)
-
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QSizePolicy
 from foundrysdk.ui.json.blocks.block_styles import (
     key_style,
     KEY_MARGINS,
 )
 
-class KeyBlock(QFrame):
+from foundrysdk.ui.json.blocks import VariableBlock
+
+
+class KeyBlock(VariableBlock):
+    """A string VariableBlock representing an object key."""
+
     def __init__(self, key, on_change=None):
-        super().__init__()
+        super().__init__(
+            value=key,
+            kind="string",
+            alignment=Qt.AlignmentFlag.AlignLeft,
+            margins=KEY_MARGINS,
+        )
 
         self.key = str(key)
         self.on_change = on_change
 
-        self.setStyleSheet(key_style())
+        self.setSizePolicy(
+            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Fixed,
+        )
 
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(*KEY_MARGINS)
-        layout.setSpacing(0)
+        self._update_style()
 
-        self.key_edit = QLineEdit(self.key)
-        self.key_edit.setReadOnly(True)
+    def _update_style(self):
+        self.setStyleSheet(key_style(self.selected))
 
-        self.key_edit.mouseDoubleClickEvent = self.edit_key
-        self.key_edit.editingFinished.connect(self.save_key)
+    def _finish_editing(self):
+        super()._finish_editing()
 
-        layout.addWidget(self.key_edit)
+        new_key = self.value_edit.text()
 
-    def edit_key(self, event):
-        self.key_edit.setReadOnly(False)
-        self.key_edit.setFocus()
-        self.key_edit.selectAll()
-
-    def save_key(self):
-        new_key = self.key_edit.text()
+        if new_key == self.key:
+            return
 
         self.key = new_key
 
         if self.on_change:
             self.on_change(new_key)
-
-        self.key_edit.setReadOnly(True)

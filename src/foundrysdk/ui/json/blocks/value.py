@@ -1,4 +1,5 @@
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -16,14 +17,18 @@ from foundrysdk.ui.json.blocks.block_styles import (
 )
 
 
-
 class ValueBlock(QFrame):
+    """A block containing an editable key and value."""
+
+    selectionChanged = Signal(bool)
+
     def __init__(self, key, value, on_change):
         super().__init__()
 
         self.key = key
         self.value = value
         self.on_change = on_change
+        self.selected = False
 
         if isinstance(value, bool):
             kind = "boolean"
@@ -50,34 +55,54 @@ class ValueBlock(QFrame):
         # Editable key
         self.key_block = KeyBlock(
             key,
-            on_change=self.save_key
+            on_change=self._save_key
         )
 
-        # Editable value
+        # Display/editable value
         self.variable = VariableBlock(display, kind)
-
-        self.value_edit = self.variable.value_edit
-        self.value_edit.mouseDoubleClickEvent = self.edit_value
-        self.value_edit.editingFinished.connect(self.save_value)
+        self.variable.valueChanged.connect(self._save_value)
 
         layout.addWidget(self.key_block)
         layout.addStretch()
         layout.addWidget(self.variable)
 
-    def save_key(self, new_key):
+    def mousePressEvent(self, event):
+        self.set_selected(True)
+        super().mousePressEvent(event)
+
+    # Public interface
+
+    def set_selected(self, selected: bool):
+        """Select or deselect this ValueBlock."""
+        if self.selected == selected:
+            return
+
+        self.selected = selected
+
+        self.setStyleSheet(
+            value_style(self._get_kind(), selected)
+        )
+
+        self.selectionChanged.emit(selected)
+
+    # Internal implementation
+
+    def _get_kind(self):
+        if isinstance(self.value, bool):
+            return "boolean"
+        elif isinstance(self.value, (int, float)):
+            return "number"
+        elif self.value is None:
+            return "null"
+        return "string"
+
+    def _save_key(self, new_key):
         self.key = new_key
 
         if self.on_change:
             self.on_change(self.value)
 
-    def edit_value(self, event):
-        self.value_edit.setReadOnly(False)
-        self.value_edit.setFocus()
-        self.value_edit.selectAll()
-
-    def save_value(self):
-        text = self.value_edit.text()
-
+    def _save_value(self, text):
         try:
             if isinstance(self.value, bool):
                 if text.lower() not in ("true", "false"):
@@ -100,7 +125,9 @@ class ValueBlock(QFrame):
                 new_value = text
 
             self.value = new_value
-            self.on_change(new_value)
+
+            if self.on_change:
+                self.on_change(new_value)
 
         except ValueError:
             QMessageBox.warning(
@@ -109,6 +136,12 @@ class ValueBlock(QFrame):
                 "Please enter a valid value."
             )
 
-            self.value_edit.setText(str(self.value))
+            # Restore the previous value in the QLabel.
+            if isinstance(self.value, bool):
+                display = str(self.value).lower()
+            elif self.value is None:
+                display = "null"
+            else:
+                display = str(self.value)
 
-        self.value_edit.setReadOnly(True)
+            self.variable.set_value(display)
