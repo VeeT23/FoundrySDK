@@ -1,0 +1,15 @@
+Third-Party Software
+====================
+
+PySide6
+Copyright (C) The Qt Company Ltd.
+License: LGPLv3 / GPLv3
+Website: https://www.qt.io/
+
+Qt Framework
+Copyright (C) The Qt Company Ltd.
+License: LGPLv3 / GPLv3
+Website: https://www.qt.io/
+
+See the respective license texts and notices
+for the components distributed with this application.
