@@ -22,6 +22,8 @@ class KeyBlock(VariableBlock):
         self.key = str(key)
         self.on_change = on_change
 
+        self.valueChanged.connect(self._on_value_changed)
+
         self.setSizePolicy(
             QSizePolicy.Policy.Fixed,
             QSizePolicy.Policy.Fixed,
@@ -32,11 +34,7 @@ class KeyBlock(VariableBlock):
     def _update_style(self):
         self.setStyleSheet(key_style(self.selected))
 
-    def _finish_editing(self):
-        super()._finish_editing()
-
-        new_key = self.value_edit.text()
-
+    def _on_value_changed(self, new_key):
         if new_key == self.key:
             return
 

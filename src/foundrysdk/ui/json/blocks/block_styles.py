@@ -59,7 +59,7 @@ VARIABLE_MARGINS = (6, 3, 6, 3)
 KEY_MARGINS = (6, 3, 6, 3)
 VALUE_MARGINS = (4, 4, 4, 4)
 CONTAINER_MARGINS = (10, 8, 10, 10)
-CHILDREN_MARGINS = (12, 8, 12, 8)
+CHILDREN_MARGINS = (4, 8, 4, 8)
 ROOT_MARGINS = (0, 0, 0, 0)
 
 # Layout spacing
@@ -88,7 +88,7 @@ def key_style(selected=False):
             border-radius: {VARIABLE_BORDER_RADIUS}px;
         }}
 
-        QLineEdit {{
+        QLabel, QLineEdit {{
             color: {TEXT_COLOR};
             background: {TRANSPARENT};
             border: none;
@@ -99,10 +99,11 @@ def key_style(selected=False):
         }}
     """
 
-def variable_style(kind, selected=False):
 
+def variable_style(kind, selected=False):
     outline = SELECTED_OUTLINE if selected else OUTLINES[kind]
     background = SELECTED_COLORS[kind] if selected else COLORS[kind]
+
     return f"""
         QFrame {{
             background: {background};
@@ -110,7 +111,7 @@ def variable_style(kind, selected=False):
             border-radius: {VARIABLE_BORDER_RADIUS}px;
         }}
 
-        QLineEdit {{
+        QLabel, QLineEdit {{
             color: {TEXT_COLOR};
             background: {TRANSPARENT};
             border: none;
